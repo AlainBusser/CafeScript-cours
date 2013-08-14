@@ -1,0 +1,630 @@
+<!doctype html>
+ 
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>interpréteur CoffeeScript</title>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+  <script src="utilitaires.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/coffee-script/1.4.0/coffee-script.min.js"></script>
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <script src="https://raw.github.com/furf/jquery-ui-touch-punch/master/jquery.ui.touch-punch.min.js"></script>
+
+<style>
+body {background: LightYellow;}
+h1, h2, h3 {color: DarkRed;}
+h4 {color: DarkBlue; }
+textarea {border: 5px inset green; border-radius: 1em; font-size: 120%;}
+textarea.entree {background-color: #EEFFEE; color: DarkBlue; font-size: 125%;}
+textarea.sortie {background-color: Black; color: Yellow; font-size: 125%;}
+code { color: DarkBlue; }
+pre.copier1 {border: 2px outset blue; border-radius: 2px; background-color: LightCyan; }
+pre.copier2 {border: 2px outset blue; border-radius: 2px; background-color: LightGreen; }
+</style>
+ 
+  
+</head>
+
+
+<body>
+<script type="text/coffeescript">
+$ ->
+	x=3
+	
+	$( "#run" ).on "click", ()->
+		temps = new Date()
+		affiche "Algorithme lancé"
+		try
+			CoffeeScript.run($('#cadrin').val())
+			temps=new Date()-temps
+			affiche "\nAlgorithme exécuté en #{temps} millisecondes\n"
+		catch error
+			alert error
+	$("#clear").on "click", () ->
+		$('#cadrout').text('')
+
+	$( "#plusloin" ).accordion 
+		collapsible: true 
+		active: false
+	$( ".tabs1" ).tabs()
+	$( ".tabs2" ).tabs()
+	$( ".copier1" ).on "click", () ->
+#		$( "#cadrin" ).append "\n"+$(this).text()
+		$( "#cadrin" ).val($("#cadrin").val()+"\n"+$(this).text())
+	$( ".copier2" ).on "click", () ->
+		$( "#cadrin" ).val($(this).text())
+
+</script>
+<img src="http://coffeescript.org/documentation/images/logo.png" alt="logo de CoffeeScript">
+<h1>Algorithmique avec CoffeeScript</h1>
+<p>Pour programmer, cliquer dans le cadre de gauche et modifier (sélection 
+puis <code>Suppr</code> ou taper sous le curseur pour insérer, ou copier-coller 
+depuis un fichier <code>coffee</code>...). Attention à l'indentation qui 
+structure les blocs d'instructions (boucles et tests par exemple).</p>
+<table id="tglobal">
+	<tr>
+		<td> 
+<textarea class="entree" id="cadrin" rows="12" cols="36">#calcul de la racine de 2 par Heron
+[a,b]=[1,2]
+for n in [1..8]
+    a=(a+b)/2
+    b=2/a
+    s="u(#{n})=#{a}"
+    affiche s
+</textarea>
+		</td>
+		<td>
+			<textarea class="sortie" disabled="true" id="cadrout" rows="12" cols="24">sortie</textarea>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<button id="run">Cours, cours !</button>
+		</td>
+		<td>
+			<button id="clear">Effacer</button>
+		</td>
+	</tr>
+</table>
+
+<div id="plusloin">
+
+<h3>aide</h3>
+<div class="tabs1">
+<ul id="aides">
+<li><a href="#affectation">Affectation</a></li>
+<li><a href="#hasard">Simulation</a></li>
+<li><a href="#tests">Tests</a></li>
+<li><a href="#intervalles">Intervalles</a></li>
+<li><a href="#infini">l'infini</a></li>
+<li><a href="#fonctions">Fonctions</a></li>
+<li><a href="#boucles">Boucles</a></li>
+<li><a href="#stats">Statistiques</a></li>
+</ul>
+
+<div id="affectation">
+	<h2>Affectation, entrée et sortie de données</h2>
+	<h3>Affectation</h3>
+	<p>En coffeescript, l'affectation est notée par un "=".</p>
+	<p>Par exemple,
+		<ol>
+			<li>Pour mettre 2 dans x:
+				<pre class="copier1">x = 2</pre>
+			</li>
+			<li>Pour le remplacer par 3:
+				<pre class="copier1">x = x+1</pre>
+			</li>
+		</ol>
+	</p>
+	<p>Une variable peut être affectée par un nombre
+mais aussi par du texte, une liste ou même une fonction.</p>
+	<h4>Affectation simultanée</h4>
+	<p>On peut affecter simultanément a par 1 et b par 2
+avec</p>
+	<pre class="copier1">[a,b] = [1,2]</pre>
+	<h4>Raccourcis</h4>
+	<p>Pour augmenter x de 1, on peut faire indifféremment</p>
+	<pre class="copier1">x = x+1
+x += 1
+x++</pre>
+	<h3>Entrée de données</h3>
+	<p>Pour faire entrer un nombre x par l'utilisateur, il faut 
+	affecter x (donc écrire un signe "égal") et afficher un message d'invite 
+	rappelant ce que représente le nombre. Par exemple</p>
+	<pre class="copier1">x = entre "Allo non mais allo quoi! Tu veux mettre quoi dans x ?"</pre>
+	<h3>Affichage de données</h3>
+	<p>Tant qu'on ne demande pas à CoffeeScript d'afficher le résultat d'un 
+	calcul, on ne peut pas connaître celui-ci. Il y a deux moyens de faire 
+	connaître le contenu de <code>x</code>:
+	<ul>
+		<li>créer une boîte modale d'affichage contenant x avec 
+		<pre class="copier1">alerte x</pre>
+		</li>
+		<li>afficher <code>x</code> dans le cadre prévu à cet effet à droite 
+		de la page avec
+		<pre class="copier1">affiche x</pre>
+		</li>
+	</ul>
+	</p>
+</div>
+
+
+<div id="hasard">
+	<h2>Simulation du hasard</h2>
+	<h4>Dé</h4>
+	<p>Pour lancer un dé à 6 faces</p>
+	<pre class="copier1">affiche dé 6</pre>
+	<p>Le nombre de faces doit être en entier, sans limite.</p>
+	<p>Pour vérifier, on peut lancer 10 fois le dé:</p>
+	<pre class="copier1">(dé 6 for n in [1..10])</pre>
+	<h4>Pile ou face</h4>
+	<p>Pour jouer à pile ou face, on lance un dé à deux faces.</p>
+	<h4>Loi uniforme sur [0;1[</h4>
+	<pre class="copier1">affiche alea()</pre>
+	<p>donne un nombre aléatoire entre 0 et 1</p>
+	<h5>Application</h5>
+	<p>On peut alors simuler une variable aléatoire Z normale centrée 
+	(d'espérance 0) et réduite (d'écart-type 1) avec</p>
+	<pre class="copier1">Z = -6
+for n in [0...12]
+    Z += alea()
+affiche Z</pre>
+</div>
+
+<div id="tests">
+	<h2>Logique</h2>
+	<h4>Égalité</h4>
+	<p>Pour tester l'égalité entre deux objets, il y a deux manières:
+	<ul>
+		<li>avec un double égal comme dans <code>2+2 == 4</code></li>
+		<li>avec le verbe <em>is</em> ("est") comme dans <code>2+2 is 4</code></li>
+	</ul>
+	</p>
+	<pre class="copier1">affiche 2+2 is 5</pre>
+	<p> affiche <code>false</code> (ben oui!)</p>
+	<h4>Négation</h4>
+	<p>Pour obtenir le contraire d'une proposition, la précéder par un point d'exclamation</p>
+	<pre class="copier1">affiche not 2+2==5
+affiche 2+2 isnt 5</pre>
+	<p>Le symbole "&ne; se note donc <code>isnt</code> ou <code>!=</code>, au choix.</p>
+	<h4>Conjonction</h4>
+	<p>Pour dire que x est à la fois positif et pair, on peut écrire</p>
+	<pre class="copier1">x > 0 && x%2 is 0</pre>
+	<h4>Disjonction</h4>
+	<p>Pour dire que x est, ou bien positif, ou bien pair (ou les deux), on peut écrire</p>
+	<pre class="copier1">x > 0 || x%2 is 0</pre>
+	<p>Pour taper le symbole "trait vertical", appuyer avec la main droite sur 
+	<button>AltGr</button> et, <em>sans lâcher ce bouton</em>, actionner le 
+	<button>6</button> en haut du clavier, de la main gauche.</p>
+	<h3>Booléens</h3>
+	<h3>Tests</h3>
+	<h4>Test simple</h4>
+	<p>Un test est une instruction conditionnelle;
+Pour n'effectuer quelque chose que lorsqu'une condition
+est vraie (par exemple seulement si le dé est tombé sur 6), faire</p>
+	<pre class="copier1">if dé(6)==6
+    affiche "gagné"</pre>
+    <p>On remarque l'indentation qui précise que la partie 
+    <code>affiche "gagné"</code> ne doit s'effectuer que si le dé vaut 6. 
+    </p>
+    <pre class="copier1">affiche "gagné" if dé(6)==6</pre>
+    <p>a le même effet.</p>
+    <h4>Test multiple</h4>
+    <p>Que faire quand le dé ne tombe <em>pas</em> sur 6 ?</p>
+    <pre class="copier1">if dé(6)==6
+    affiche "gagné"
+else
+    affiche "perdu"</pre>
+    <h4>Intervalles</h4>
+    <p>On peut aussi faire un test dans un intervalle:</p>
+    <pre class="copier1">(x for x in [1..12] when x%2==0)</pre>
+    
+</div>
+
+<div id="intervalles">
+	<h2>Intervalles</h2>
+	<p>En CoffeeScript, les intervalles sont composés uniquement d'entiers.
+L'intervalle fermé [a;b] se note [a..b] avec deux points;
+L'intervalle ouvert à droite [a;b[ se note [a...b] avec trois points;
+L'appartenance se note <code>in</code>; 
+Pour vérifier que 2 est compris entre 0 et 5:</p>
+	<pre class="copier1">affiche 2 in [0..5]
+affiche 0 <= 2 <= 5
+	</pre>
+	<p>L'appartenance est aussi utilisée pour appliquer 
+une fonction à un intervalle:</p>
+	<pre class="copier1">affiche (x*x for x in [0..5])</pre>
+	<h3>Ensembles</h3>
+	<h4>Ajout d'un élément</h4>
+	<p>Pour ajouter un élement x à un ensemble A:</p>
+	<pre class="copier1">A.push x</pre>
+	<h4>Retrait d'un élément</h4>
+	<p>Pour enlever le nombre 5 d'un ensemble A:</p>
+	<pre class="copier1">A = (x for x in A if x isnt 5)</pre>
+	<h3>Intervalles d'entiers</h3>
+	<h3>Ensembles</h3>
+	<h4>Intersection</h4>
+	<p>L'intersection de deux ensembles A et B
+est formée des x de A qui sont aussi dans B:</p>
+	<pre class="copier1">I=(x for x in A when x in B)</pre>
+	<h4>Complémentaire</h4>
+	<p>Une légère différence mais qui change tout:</p>
+	<pre class="copier1">(x for x in A when x not in B)</pre>
+	<p>est le complémentaire de B dans A.</p>
+	<p>En probabilités, cette notion formalise le
+contraire d'un évènement.</p>
+	<h4>Réunion</h4>
+	<p>La réunion de deux intervalles n'est pas nécessairement
+un intervalle:</p>
+	<pre class="copier1">A=(x for x in [0..100] when 2 < x < 15 or 80 <= x < 90)
+affiche A</pre>
+</div>
+
+
+<div id="infini">
+	<h2>l'Infini dans CoffeeScript</h2>
+	<p>Si on divise 0 par 0 on obtient <code>NaN</code>
+(<em>not a number</em>) qui signifie que la division n'a pas de sens.
+Mais si on divise 1 (ou tout autre nombre non nul) par 0,
+on obtient <code>Infinity</code>, ce qui veut dire que lorsqu'une variable x
+tend vers 0, son inverse 1/x tend vers l'infini;</p>
+	<p>De même,</p>
+	<pre class="copier1">1/Infinity</pre>
+	<p>donne 0: Si une variable x tend vers l'infini,
+son inverse 1/x tend vers 0.</p>
+	<h3>Opérations</h3>
+	<h4>Addition</h4>
+	<pre class="copier1">affiche Infinity+Infinity</pre>
+	<p>La somme de deux fonctions qui tendent vers +&infin; tend elle-même 
+	vers +&infin;</p>
+	<pre class="copier1">affiche 3+Infinity</pre>
+	<p>La somme d'une fonction qui tend vers 3 et d'une fonction qui tend vers 
+	+&infin; tend elle-même vers +&infin;</p>
+	<pre class="copier1">affiche Infinity-Infinity</pre>
+	<p>On ne peut rien conclure sur la somme d'une fonction qui tend vers 
+	+&infin; et d'une fonction qui tend vers -&infin;: Il s'agit d'une 
+	<em>forme indéterminée</em>.</p>
+	<h4>Multiplication</h4>
+	<pre class="copier1">affiche Infinity*Infinity</pre>
+	<p>Le produit de deux fonctions qui tendent vers +&infin; tend lui-même 
+	vers +&infin;</p>
+	<pre class="copier1">affiche 3*Infinity</pre>
+	<p>Le produit d'une fonction qui tend vers 3 et d'une fonction qui tend vers 
+	+&infin; tend lui-même vers +&infin;</p>
+	<pre class="copier1">affiche 0*Infinity</pre>
+	<p>On ne peut pas conclure sur le produit d'une fonction qui tend 
+	vers &infin; et d'une fonction qui tend vers 0: Il s'agit d'une 
+	<em>forme indéterminée</em>.</p>
+	<h4>Croissance comparée</h4>
+	<pre class="copier1">affiche leLogarithmeDe 0
+affiche leLogarithmeDe Infinity</pre>
+	<p>La limte de ln en 0 est -&infin; et la limite de ln en +&infin; est +&infin;</p>
+	<pre class="copier1">affiche exp -Infinity
+affiche exp Infinity</pre>
+	<p>La limite de e<sup>x</sup> est 0 lorsque x tend vers -&infin; 
+	et +&infin; lorsque x tend vers +&infin;.</p>
+</div>
+
+<div id="fonctions">
+	<h2>Fonctions</h2>
+	<p>Une fonction associe à une variable d'entrée (ou plusieurs)
+appelée <em>antécédent</em>, une (ou plusieurs) variable de sortie
+appelée <em>image</em>; l'image de x par la fonction f est notée f(x);
+Aussi, en CoffeeScript, une fonction est-elle désignée par une
+flèche -> séparant l'antécédent, entre parenthèses, de l'image,
+qui est une expression. Après la flèche on peut insérer un algorithme
+destiné à calculer la fonction par algorithme.</p>
+	<p>La dernière ligne écrite dans la fonction est la valeur retournée.</p>
+	<p>Une fonction peut ne pas avoir d'antécédent, dans ce cas c'est une 
+	<em>procédure</em>.</p>
+	<h3>Cas particuliers</h3>
+	<h4>Fonctions constantes</h4>
+	<pre class="copier1">(x) -> 3</pre>
+	<p>est une fonction <em>constante</em>.</p>
+	<h5>Fonctions affines</h5>
+	<pre class="copier1">(x) -> x/2+1</pre>
+	<p>est une fonction <em>affine</em>.</p>
+	<h3>Une variable peut être une fonction</h3>
+	<p>On peut affecter une variable par une fonction comme dans</p>
+	<pre class="copier1">f = (x) ->
+    x*x-2*x-1</pre>
+    <p>Ensuite on peut entrer <code>f(3)</code> ou <code>f 3</code> pour avoir l'image de 3 par f.</p>
+    <h3>Fonctions prédéfinies</h3>
+    <p>Parmi les fonctions prédéfinies, on trouve
+    <ul>
+		<li><code>sinus</code> et <code>cosinus</code> en degrés (pour l
+		es radians, utiliser <code>sin</code> et <code>cos</code>)</li>
+		<li><code>laRacineDe</code> pour la racine carrée; <code>leCarréDe</code>, 
+		<code>leCubeDe</code> pour le carré et le cube d'un nombre; 
+		<code>lInverseDe</code> pour l'inverse d'un nombre (1 divisé par ce nombre)</li>
+		<li><code>leLogarithmeDe</code> pour le logarithme népérien, et 
+		<code>lExponentielleDe</code> pour e<sup>x</sup>.</li>
+		<li>les fonctions de JavaScript sont disponibles dans CoffeeScript</li>
+    </ul>
+    </p>
+</div>
+
+<div id="boucles">
+	<h2>Boucles</h2>
+	<h3>Boucler n fois</h3>
+	<h4>Pas à pas</h4>
+	<p>Pour répéter 10 fois une action, on a besoin d'une variable appelée
+	indice de la boucle. Ici on notera i cet indice, qui ira de 1 à 10.</p>
+	<p>Par exemple, pour lancer un dé 10 fois, on peut entrer</p>
+	<pre class="copier1">for i in [1..10]
+    affiche dé 6</pre>
+    <p>Un bon moyen de suivre l'indice d'une boucle est d'afficher
+	celui-ci dans la boucle:</p>
+	<pre class="copier1">for in in [1..10]
+    affiche i</pre>
+    <h5>Remarque:</h5>
+    <pre class="copier1">affiche i for i in [1..10]</pre>
+    <p>a le même effet...</p>
+    <p>Les nombres 1, 2, 3 etc parcourus forment une <em>suite arithmétique</em>
+     de raison 1.</p>
+    <h4>Autres suites arithmétiques</h4>
+    <p>Pour faire descendre l'indice (compte à rebours) on peut faire</p>
+    <pre class="copier1">affiche i for i in [10..1]</pre>
+    <p>Pour aller de 3 en 3 on peut faire</p>
+    <pre class="copier1">affiche i for i in [1..10] when i%3 is 1</pre>
+    <p>ou, mieux:</p>
+    <pre class="copier1">affiche i for i in [1..10] by 3</pre>
+    <h4>Boucler sur les nombres premiers</h4>
+    <p>Pour boucler sur les nombres premiers inférieurs à 20:</p>
+    <pre class="copier1">for i in [2,3,5,7,11,13]</pre>
+	<h3>Boucler jusqu'à une condition</h3>
+	<p>Pour lancer un dé jusqu'à ce qu'on ait un 6 (et compter les
+	lancers dans un indice i), on fait</p>
+	<h4>Jusque</h4>
+	<pre class="copier1">i=0
+i++ until dé(6) is 6</pre>
+	<p>Il y a plusieurs manières de faire ça; par exemple</p>
+	<pre class="copier1">i=1
+i++ while dé(6) isnt 6</pre>
+	<h4>Tant que</h4>
+	<p>On peut aussi faire comme ceci:</p>
+	<pre class="copier1">i=1
+while dé(6) isnt 6
+    i=i+1</pre>
+</div>
+
+<div id="stats">
+	<h2>Statistiques</h2>
+	<p>Pour faire des statistiques sur une liste, il est parfois nécessaire 
+	de la trier (par exemple, pour calculer les qunatiles). Comme "trier" se dit 
+	"sort" en anglais, on trie la liste L ainsi:</p>
+	<h4>Tri dans l'ordre croissant</h4>
+	<pre class="copier1">
+	L.sort (x,y)->(x > y)
+	</pre>
+	<h4>Tri dans l'ordre décroissant</h4>
+	<pre class="copier1">
+	L.sort (x,y)->(x < y)
+	</pre>
+	<h4>Maximum et minimum</h4>
+	<pre class="copier1">Math.max.apply  null,L
+Math.min.apply  null,L</pre>
+	<p>Pour connaître l'effectif total d'une liste, on peut utiliser 
+	sa "longueur" (en anglais, <em>length</em>):</p>
+	<h4>Compter les éléments d'une liste</h4>
+	<pre class="copier1">L.length</pre>
+	<h4>Somme des éléments d'une liste</h4>
+	<pre class="copier1">somme=0
+for e in L
+    somme+=e</pre>
+</div>
+
+</div>
+<h3>Exemples</h3>
+<div class="tabs2">
+<ul id="exples">
+<li><a href='#euclide'>Algorithme d'Euclide</a></li>
+<li><a href='#heron'>Algorithme de Heron</a></li>
+<li><a href='#geom'>Suites géométriques</a></li>
+<li><a href="#log">Algorithme de Briggs</a></li>
+<li><a href="#fibo">Suite de Fibonacci</a></li>
+<li><a href="#toscane">Problème du Grand-Duc</a></li>
+<li><a href="#mere">Chevalier de Méré</a></li>
+<li><a href="#poker">Jeux de cartes</a></li>
+</ul>
+<div id="euclide">
+	<h2>Algorithme d'Euclide</h2>
+	<p>Pour calculer le pgcd de deux nombres a et b, on remplace a et b par b et r 
+	jusqu'à ce que r soit nul (r est le reste de la division de a par b).</p>
+	<h4>version classique:</h4>
+	<pre class="copier2">
+pgcd = (a,b) ->
+    [x,y]=[a,b]
+    while y>0
+        [x,y]=[y,x%y]
+    x
+
+affiche pgcd 55,34
+	</pre>
+	<h4>Version CoffeeScript:</h4>
+	<pre class="copier2">
+pgcd = (a,b) ->
+    [x,y]=[a,b]
+    [x,y]=[y,x%y] until y is 0
+    x
+
+affiche pgcd 55,34
+	</pre>
+</div>
+<div id="heron">
+	<h2>Calcul de racines carrées par l'algorithme de Heron</h2>
+	<p>Pour calculer la racine carrée de 5 par l'algorithme de Heron, 
+	on remplace une valeur approchée a (par défaut), par sa moyenne avec 
+	5/a (valeur approchée par excès); et on recommence jusqu'à ce que la 
+	différence entre les valeurs approchées par défaut et par excès soit 
+	devenue imperceptible.</p>
+	<h4>Calcul de &radic;(5)</h4>
+	<pre class="copier2">
+[a,b]=[1,5]
+until (abs b-a)<1e-16
+    a=(a+b)/2
+    b=5/a
+affiche a
+	
+	</pre>
+	<h4>Fonction racine carrée</h4>
+	<pre class="copier2">
+racineDe = (x) ->
+    [a,b]=[1,x]
+    until (abs b-a) < 1e-16
+        a=(a+b)/2
+        b=x/a
+    a
+    
+affiche racineDe 5
+	
+	</pre>
+</div>
+<div id="geom">
+	<h2>Suites géométriques</h2>
+	<p>Combien de fois faut-il lancer un dé équilibré pour que la probabilité 
+	d'avoir un 6 dépasse 0,99 ?</p>
+	<p>La condition de sortie se traduisant par le fait que la probabilité 
+	de ne pas avoir de 6 est en-dessous de 0,01; et comme si les lancers 
+	sont indépendants, cette probabilité suit une suite géométrique de raison 
+	5/6:</p>
+	<pre class="copier2">
+proba = 1
+nombreDeLancers=1
+until proba < 0.01
+    proba *= 5/6
+    nombreDeLancers++
+affiche "En lançant #{nombreDeLancers} fois le dé, la probabilité d'avoir un 6 est #{1-proba}"
+	</pre>
+</div>
+<div id="loga">
+	<h2>Briggs</h2>
+	<p>Algorithme de Briggs pour calculer des logarithmes</p>
+	<pre class="copier2">
+log = (x) ->
+    if x > 0
+        [r,n]=[x,0]
+        until 0.999999 < r < 1.000001
+            n++
+            r=racine r
+        r -= 1
+        r *= 2 for k in [1..n]
+        r
+
+
+affiche log 2.7182818
+	</pre>
+</div>
+<div id="fibo">
+	<h2>Suite de Fibonacci</h2>
+	<p>La suite F<sub>n</sub> est définie par la relation de récurrence 
+	F<sub>n+2</sub>=F<sub>n+1</sub>+F<sub>n</sub>. Si 
+	F<sub>0</sub>=F<sub>1</sub>=1, la suite est entièrement déterminée.</p>
+	<h4>Version classique</h4>
+	<pre class="copier2">
+[a,b]=[1,1]
+for n in [1..10]
+    [a,b]=[a+b,a]
+    affiche "F(#{n})=#{b}"
+	</pre>
+	<h4>Formule de Binet</h4>
+	<pre class="copier2">
+nombreDor = (1 + racine 5)/2 
+for n in [1..10]
+    b = puissance nombreDor, n
+    b /= racine 5
+    b = arrondi b
+    affiche "F(#{n})=#{b}"</pre>
+</div>
+
+<div id="toscane">
+	<h2>Problème du Grand-Duc de Toscane</h2>
+	<p>Lorsque Galilee lui donnait des cours, Cosme de Medicis, futur 
+	Grand-Duc de Toscane, lui a demandé comment ça se fait que lorsqu'on 
+	additionne les résultats de 3 dés, le 10 sort plus souvent que le 9, alors 
+	que
+	<ul>
+		<li>9=1+2+6=1+3+5=1+4+4=2+2+5=2+3+4=3+3+3</li>
+		<li>10=1+3+6=1+4+5=2+2+6=2+3+5=2+4+4=3+3+4</li>
+	</ul>
+	soit 6 manières dans chaque cas.
+	</p>
+	<h4>Simulation</h4>
+	<pre class="copier2">effectifs=(0 for n in [3..18])
+for n in [1..100000]
+    effectifs[dé(6)+dé(6)+dé(6)-3]++
+affiche "Le 9 est sorti #{effectifs[6]} fois"
+affiche "Le 10 est sorti #{effectifs[7]} fois"
+</pre>
+	<h4>Calcul des probabilités</h4>
+	<pre class="copier2">effectifs = (0 for n in [3..18])
+for a in [1..6]
+    for b in [1..6]
+        for c in [1..6]
+            effectifs[a+b+c-3]++
+d = puissance 6,3
+affiche "La probabilité d'avoir un 9 est #{effectifs[6]/d}"
+affiche "La probabilité d'avoir un 10 est #{effectifs[7]/d}"
+	</pre>
+</div>
+
+<div id="mere">
+	<h2>Problème du Chevalier de Méré</h2>
+	<p>Dans une lettre à Blaise Pascal, le Chevalier de Méré 
+	lui a posé la question suivante: <q>Comment se fait-il qu'en lançant 
+	4 dés, on a plus d'une chance sur 2 d'avoir au moins un 6 ?</q></p>
+	<h4>Simulation du lancer de 4 dés</h4>
+	<pre class="copier2">gains=0
+for n in [1..100000]
+    jeu=(dé(6) for n in [1..4])
+    if (x for x in jeu when x is 6).length
+        gains++
+affiche gains/100000</pre>
+	<h4>Calcul de la probabilité</h4>
+	<pre class="copier2">gains=0
+for a in [1..6]
+    for b in [1..6]
+        for c in [1..6]
+            for d in [1..6]
+                if a is 6 or b is 6 or c is 6 or d is 6
+                    gains++
+d = puissance 6,4
+affiche gains/d</pre>
+	<h4>Avec une suite géométrique</h4>
+	<p>Comme la probabilité de ne pas avoir de 6 en lançant un dé est 5/6, et par 
+	indépendance des lancers de dés, la probabilité de na pas avoir de 6 en lançant 
+	4 dés est le quatrième terme d'une suite géométrique de premier terme 5/6 et 
+	de raison 5/6:</p>
+	<pre class="copier2">u = 1
+(u *= 5/6 for n in [1..4])
+affiche 1-u</pre>
+
+</div>
+
+<div id="poker">
+	<h2>Poker avec 32 cartes</h2>
+	<p>Tirer 5 cartes (une "main") dans un jeu de 32 cartes, c'est 
+	constituer un échantillon d'effectif 5 dans une population totale de 
+	32. C'est donc la base de la statistique.</p>
+	<h4>Tirage avec remise</h4>
+	<p>Si on répète 5 fois l'expérience de tirer une carte, on risque 
+	d'avoir plusieurs fois la même carte (tirage avec remise). Mais ce 
+	risque est minime:</p>
+	<pre class="copier2">couleur=['♦','♥','♠','♣']
+valeur=['1','7','8','9','10','V','D','R']
+jeu=[]
+for c in couleur
+    for v in valeur
+      jeu.push "#{v}#{c}"
+main=[]
+for n in [1..5]
+    main.push jeu[dé(32)-1]
+affiche main</pre>
+</div>
+
+</div>
+
+</body>
+</html>
